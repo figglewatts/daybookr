@@ -1,2 +1,2 @@
 # daybookr
-SSG for journals. Quick and dirty, extremely barebones. Great for scatterbrained hackers in a rush.
+SSG for journals. Quick and dirty, extremely barebones. Great for scatterbrained people in a rush.
