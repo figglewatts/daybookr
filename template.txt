@@ -1,0 +1,4 @@
+Tag: {{.Header.Tags}} at {{.Header.Date}}
+
+This is the post body:
+{{.Body}}
