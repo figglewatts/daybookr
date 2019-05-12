@@ -2,10 +2,11 @@ package daybookr
 
 import (
 	"fmt"
+	"os"
 	"strings"
+	"text/template"
 	"time"
 
-	"gopkg.in/russross/blackfriday.v2"
 	"gopkg.in/yaml.v2"
 )
 
@@ -22,8 +23,32 @@ type Post struct {
 	Body   string
 }
 
+func CreatePost(templateFile string, postFile string) (string, error) {
+	templateTxt, err := LoadText(templateFile)
+	if err != nil {
+		return "", fmt.Errorf("could not load template: %v", err)
+	}
+
+	post, err := loadPost(postFile)
+	if err != nil {
+		return "", fmt.Errorf("error while loading: %v", err)
+	}
+
+	tmpl, err := template.New("post").Parse(templateTxt)
+	if err != nil {
+		return "", err
+	}
+
+	err = tmpl.Execute(os.Stdout, post)
+	if err != nil {
+		return "", err
+	}
+
+	return "", nil
+}
+
 // LoadPost is used to load a markdown file to a Post struct.
-func LoadPost(filename string) (Post, error) {
+func loadPost(filename string) (Post, error) {
 	newPost := Post{}
 
 	// load the text from the file
@@ -49,13 +74,6 @@ func LoadPost(filename string) (Post, error) {
 	newPost.Header = parsedHeader
 
 	return newPost, nil
-}
-
-// convert markdown into HTML
-func htmlFromMarkdown(markdown string) string {
-	markdownBytes := []byte(markdown)
-	htmlBytes := blackfriday.Run(markdownBytes)
-	return string(htmlBytes)
 }
 
 // split a markdown post into header (YAML front matter) and body (markdown)

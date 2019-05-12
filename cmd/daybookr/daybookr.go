@@ -4,8 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path"
 	"time"
 
+	"github.com/figglewatts/daybookr/internal/daybookr"
 	"gopkg.in/urfave/cli.v1"
 )
 
@@ -15,6 +17,21 @@ type daybookrArgs struct {
 
 const (
 	baseURLArgIndex = iota
+)
+
+type daybookrFlags struct {
+	InputFolder  string
+	OutputFolder string
+	ConfigPath   string
+}
+
+const (
+	inputFolderFlagName   = "input"
+	inputFolderShortName  = "i"
+	outputFolderFlagName  = "output"
+	outputFolderShortName = "o"
+	configPathFlagName    = "config"
+	configPathShortName   = "c"
 )
 
 func getArgs(c *cli.Context) (daybookrArgs, error) {
@@ -28,18 +45,31 @@ func getArgs(c *cli.Context) (daybookrArgs, error) {
 	}, nil
 }
 
+func getFlags(c *cli.Context) daybookrFlags {
+	inputFolder := c.String(inputFolderShortName)
+	return daybookrFlags{
+		InputFolder:  inputFolder,
+		OutputFolder: path.Join(inputFolder, c.String(outputFolderFlagName)),
+		ConfigPath:   path.Join(inputFolder, c.String(configPathFlagName)),
+	}
+}
+
 func runDaybookr(c *cli.Context) error {
+	// parse command line args
 	args, err := getArgs(c)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf(args.BaseURL)
+	// get optional flags
+	flags := getFlags(c)
 
-	// _, err = daybookr.CreatePost("template.txt", "first-entry.md")
-	// if err != nil {
-	// 	return fmt.Errorf("Could not open post: %v", err)
-	// }
+	// generate the site
+	err = daybookr.Generate(args.BaseURL, flags.InputFolder, flags.OutputFolder, flags.ConfigPath)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -56,17 +86,17 @@ func main() {
 	app.Copyright = "(c) 2019 Figglewatts"
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
-			Name:  "input, i",
+			Name:  fmt.Sprintf("%s, %s", inputFolderFlagName, inputFolderShortName),
 			Usage: "folder to build the site from",
 			Value: ".",
 		},
 		cli.StringFlag{
-			Name:  "output, o",
+			Name:  fmt.Sprintf("%s, %s", outputFolderFlagName, outputFolderShortName),
 			Usage: "folder to output static site to",
 			Value: "static",
 		},
 		cli.StringFlag{
-			Name:  "config, c",
+			Name:  fmt.Sprintf("%s, %s", configPathFlagName, configPathShortName),
 			Usage: "config file to use when building site",
 			Value: "daybook.yml",
 		},

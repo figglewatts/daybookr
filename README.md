@@ -34,11 +34,6 @@ $ daybookr
         - links in footer
 
 ## Todo
-- Command line integration
-    - args for custom folder
-    - args for config override
-    - args for custom output dir
-    - arg for site base name
 - Load in config file
 - Site data structure to hold config/args
 - URL generator based on site base name

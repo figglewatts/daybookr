@@ -2,39 +2,43 @@ package daybookr
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
-	"text/template"
 )
 
-func LoadText(filename string) (string, error) {
-	data, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return "", err
-	}
-	return string(data), nil
-}
-
-func CreatePost(templateFile string, postFile string) (string, error) {
-	templateTxt, err := LoadText(templateFile)
-	if err != nil {
-		return "", fmt.Errorf("could not load template: %v", err)
+func Generate(baseURL string, inputFolder string, outputFolder string, configPath string) error {
+	// check to see if the input folder exists
+	inputFolderExists, err := exists(inputFolder)
+	if err != nil || !inputFolderExists {
+		return fmt.Errorf("input folder '%s' did not exist", inputFolder)
 	}
 
-	post, err := LoadPost(postFile)
-	if err != nil {
-		return "", fmt.Errorf("error while loading: %v", err)
+	// check to see if the config file exists
+	configPathExists, err := exists(configPath)
+	if err != nil || !configPathExists {
+		return fmt.Errorf("config file '%s' did not exist", configPath)
 	}
 
-	tmpl, err := template.New("post").Parse(templateTxt)
+	// check to see if the output folder exists, and create it if not
+	outputFolderExists, err := exists(outputFolder)
 	if err != nil {
-		return "", err
+		return err
+	}
+	if !outputFolderExists {
+		os.MkdirAll(outputFolder, os.ModePerm)
 	}
 
-	err = tmpl.Execute(os.Stdout, post)
+	// load the config
+	config, err := loadConfig(configPath)
 	if err != nil {
-		return "", err
+		return fmt.Errorf("could not load config: %v", err)
 	}
 
-	return "", nil
+	site, err := createSite(baseURL, config)
+	if err != nil {
+		return fmt.Errorf("could not create site: %v", err)
+	}
+
+	fmt.Println(site)
+
+	return nil
 }
