@@ -12,8 +12,31 @@ $ go install github.com/figglewatts/daybookr/cmd/daybookr
 ```
 
 ## Usage
-```bash
-$ daybookr
+```
+NAME:
+   daybookr - generate a journal based on some content, config and templates
+
+USAGE:
+   daybookr [global options] <BASE-URL>
+
+VERSION:
+   0.1
+
+AUTHOR:
+   Figglewatts
+
+COMMANDS:
+     help, h  Shows a list of commands or help for one command
+
+GLOBAL OPTIONS:
+   --input FOLDER, -i FOLDER   use FOLDER to generate the site (default: ".")
+   --output FOLDER, -o FOLDER  FOLDER relative to --input to build the site into (default: "static")
+   --config CONFIG, -c CONFIG  CONFIG file relative to --input to build the site from (default: "daybook.yml")
+   --help, -h                  show help
+   --version, -v               print the version
+
+COPYRIGHT:
+   (c) 2019 Figglewatts
 ```
 
 ## Design

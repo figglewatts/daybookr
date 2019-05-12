@@ -87,17 +87,17 @@ func main() {
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:  fmt.Sprintf("%s, %s", inputFolderFlagName, inputFolderShortName),
-			Usage: "folder to build the site from",
+			Usage: "use `FOLDER` to generate the site",
 			Value: ".",
 		},
 		cli.StringFlag{
 			Name:  fmt.Sprintf("%s, %s", outputFolderFlagName, outputFolderShortName),
-			Usage: "folder to output static site to",
+			Usage: "`FOLDER` relative to --input to build the site into",
 			Value: "static",
 		},
 		cli.StringFlag{
 			Name:  fmt.Sprintf("%s, %s", configPathFlagName, configPathShortName),
-			Usage: "config file to use when building site",
+			Usage: "`CONFIG` file relative to --input to build the site from",
 			Value: "daybook.yml",
 		},
 	}
