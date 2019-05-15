@@ -13,6 +13,7 @@ type Site struct {
 	Subtitle    string
 	Author      string
 	Pages       []Page
+	HeaderLinks []Link
 	FooterLinks []Link
 	Conf        simpleyaml.Yaml
 	Tags        []string

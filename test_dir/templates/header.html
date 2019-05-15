@@ -1,0 +1,12 @@
+<header>
+    <span class="nowrap">
+        <h1>{{.Title}}</h1>
+        <h2>{{.Subtitle}}</h2>
+    </span>
+    <nav>
+        {{range .HeaderLinks}}
+        <a href="{{.Target.String}}">{{.Text}}</a>
+        {{end}}
+    </nav>
+    <hr />
+</header>

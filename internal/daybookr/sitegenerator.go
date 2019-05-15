@@ -3,7 +3,14 @@ package daybookr
 import (
 	"fmt"
 	"os"
+	"path"
+	"path/filepath"
+	"strings"
+	"text/template"
 )
+
+const templatesDir = "templates"
+const entriesDir = "entries"
 
 func Generate(baseURL string, inputFolder string, outputFolder string, configPath string) error {
 	// check to see if the input folder exists
@@ -40,5 +47,50 @@ func Generate(baseURL string, inputFolder string, outputFolder string, configPat
 
 	fmt.Println(site)
 
+	templates, err := loadAllTemplates(path.Join(inputFolder, templatesDir))
+	if err != nil {
+		return err
+	}
+
+	// load/scan entries for tags and years/months...
+
+	// create pages (from templates)...
+	// write out to files (index in folder)
+
+	// create entries (from template)
+	// write out to files (for each entry to permalink)
+
+	// organise into archive pages and write these out
+
+	// create the index page
+
 	return nil
+}
+
+func loadAllTemplates(templatesDir string) ([]*template.Template, error) {
+	var loadedTemplates []*template.Template
+	templates, err := getFilesInDir(templatesDir, "*.html")
+	if err != nil {
+		return nil, err
+	}
+	for _, template := range templates {
+		loadedTemplate, err := loadTemplate(template)
+		if err != nil {
+			return nil, fmt.Errorf("could not load template '%s': %v", template, err)
+		}
+		loadedTemplates = append(loadedTemplates, loadedTemplate)
+	}
+	return loadedTemplates, nil
+}
+
+func loadTemplate(templatePath string) (*template.Template, error) {
+	// the file name is the template name, grab it without the extension
+	templateName := strings.Split(filepath.Base(templatePath), ".")[0]
+
+	templateContent, err := LoadText(templatePath)
+	if err != nil {
+		return nil, err
+	}
+
+	return template.New(templateName).Parse(templateContent)
 }

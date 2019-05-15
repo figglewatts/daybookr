@@ -57,10 +57,14 @@ COPYRIGHT:
         - links in footer
 
 ## Todo
-- Load in config file
-- Site data structure to hold config/args
-- URL generator based on site base name
+- Header links in config
 - Render site pages based on template combination and config
+- Pagination for long pages
+- Templates
+   - Front page
+   - Entry archive
+   - Tag archive
+   - Entry
 - Generate front page (with all posts)
 - Generate bespoke pages from config
 - Generate archive page

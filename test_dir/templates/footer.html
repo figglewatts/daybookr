@@ -1,0 +1,10 @@
+<footer>
+    <span class="nowrap">
+        Created by {{.Author}}
+        <nav>
+            {{range .FooterLinks}}
+            <a href="{{.Target.String}}">{{.Text}}</a>
+            {{end}}
+        </nav>
+    </span>
+</footer>
