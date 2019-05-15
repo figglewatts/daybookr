@@ -10,7 +10,7 @@ import (
 )
 
 const templatesDir = "templates"
-const entriesDir = "entries"
+const postsDir = "posts"
 
 func Generate(baseURL string, inputFolder string, outputFolder string, configPath string) error {
 	// check to see if the input folder exists
@@ -47,20 +47,38 @@ func Generate(baseURL string, inputFolder string, outputFolder string, configPat
 
 	fmt.Println(site)
 
+	// load all templates
 	templates, err := loadAllTemplates(path.Join(inputFolder, templatesDir))
 	if err != nil {
 		return err
 	}
 
+	fmt.Println(templates)
+
+	// load all posts
+	posts, err := loadAllPosts(path.Join(inputFolder, postsDir))
+	if err != nil {
+		return err
+	}
+
+	// get all the tags from posts
+	tags := getAllTagsFromPosts(posts)
+	for _, tag := range tags.Iterate() {
+		fmt.Println(tag)
+	}
+
+	// Site contains EVERYTHING to generate the site
+	// templates are responsible for accessing this in the right way
+
 	// load/scan entries for tags and years/months...
 
-	// create pages (from templates)...
+	// create pages (from templates by executing)...
 	// write out to files (index in folder)
 
-	// create entries (from template)
+	// create entries (from template by executing)
 	// write out to files (for each entry to permalink)
 
-	// organise into archive pages and write these out
+	// organise into archive pages and write these out (from templates by executing)
 
 	// create the index page
 
@@ -93,4 +111,30 @@ func loadTemplate(templatePath string) (*template.Template, error) {
 	}
 
 	return template.New(templateName).Parse(templateContent)
+}
+
+func loadAllPosts(postDir string) ([]Post, error) {
+	var loadedPosts []Post
+	posts, err := getFilesInDir(postDir, "*.md")
+	if err != nil {
+		return nil, err
+	}
+	for _, post := range posts {
+		loadedPost, err := loadPost(post)
+		if err != nil {
+			return nil, fmt.Errorf("could not load post '%s': %v", post, err)
+		}
+		loadedPosts = append(loadedPosts, loadedPost)
+	}
+	return loadedPosts, nil
+}
+
+func getAllTagsFromPosts(posts []Post) *TagSet {
+	tags := NewTagSet()
+	for _, post := range posts {
+		for _, tag := range post.Header.Tags {
+			tags.Add(tag)
+		}
+	}
+	return tags
 }

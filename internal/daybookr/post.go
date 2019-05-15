@@ -2,9 +2,7 @@ package daybookr
 
 import (
 	"fmt"
-	"os"
 	"strings"
-	"text/template"
 	"time"
 
 	"gopkg.in/yaml.v2"
@@ -21,30 +19,6 @@ type PostHeader struct {
 type Post struct {
 	Header PostHeader
 	Body   string
-}
-
-func CreatePost(templateFile string, postFile string) (string, error) {
-	templateTxt, err := LoadText(templateFile)
-	if err != nil {
-		return "", fmt.Errorf("could not load template: %v", err)
-	}
-
-	post, err := loadPost(postFile)
-	if err != nil {
-		return "", fmt.Errorf("error while loading: %v", err)
-	}
-
-	tmpl, err := template.New("post").Parse(templateTxt)
-	if err != nil {
-		return "", err
-	}
-
-	err = tmpl.Execute(os.Stdout, post)
-	if err != nil {
-		return "", err
-	}
-
-	return "", nil
 }
 
 // LoadPost is used to load a markdown file to a Post struct.
