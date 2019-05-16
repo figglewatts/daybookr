@@ -1,5 +1,8 @@
 title: My Journal
 subtitle: This is my journal
 author: Figglewatts
-pages: []
-footer-links: []
+footer-links:
+  - text: "Twitter"
+    target: "www.twitter.com"
+  - text: "Google"
+    target: "www.google.com"

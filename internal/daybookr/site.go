@@ -8,15 +8,16 @@ import (
 	"github.com/smallfish/simpleyaml"
 )
 
+// TODO(sam): fields for archives
 type Site struct {
 	Title       string
 	Subtitle    string
 	Author      string
 	Pages       []Page
+	Posts       []Post
 	HeaderLinks []Link
 	FooterLinks []Link
 	Conf        simpleyaml.Yaml
-	Tags        []string
 	BaseURL     *url.URL
 }
 
@@ -29,7 +30,7 @@ func (site Site) MakeSiteURL(relativeURL string) (*url.URL, error) {
 	return url, nil
 }
 
-func createSite(baseURL string, config *simpleyaml.Yaml) (Site, error) {
+func createSite(baseURL string, config *simpleyaml.Yaml, inputDir string) (Site, error) {
 	site := Site{}
 	err := site.populateWithConfig(config)
 	if err != nil {
@@ -40,42 +41,41 @@ func createSite(baseURL string, config *simpleyaml.Yaml) (Site, error) {
 		return Site{}, fmt.Errorf("invalid base URL: %v", err)
 	}
 	site.BaseURL = createdBaseURL
+
+	pages, err := loadAllPages(path.Join(inputDir, pagesDir))
+	if err != nil {
+		return Site{}, fmt.Errorf("could not load pages: %v", err)
+	}
+	site.Pages = pages
+
+	posts, err := loadAllPosts(path.Join(inputDir, postsDir))
+	if err != nil {
+		return Site{}, fmt.Errorf("could not load posts: %v", err)
+	}
+	site.Posts = posts
+
 	return site, nil
 }
 
 func (site *Site) populateWithConfig(config *simpleyaml.Yaml) error {
-	title, err := config.Get(ConfigTitleField).String()
+	title, err := config.Get(configTitleField).String()
 	if err != nil {
 		return err
 	}
-	subtitle, err := config.Get(ConfigSubtitleField).String()
+	subtitle, err := config.Get(configSubtitleField).String()
 	if err != nil {
 		return err
 	}
-	author, err := config.Get(ConfigAuthorField).String()
+	author, err := config.Get(configAuthorField).String()
 	if err != nil {
 		return err
 	}
 
-	pagesArrayYAML := config.Get(ConfigPagesField)
-	footerLinksArrayYAML := config.Get(ConfigFooterLinksField)
+	footerLinksArrayYAML := config.Get(configFooterLinksField)
 
 	site.Title = title
 	site.Subtitle = subtitle
 	site.Author = author
-
-	pagesArray, err := pagesArrayYAML.Array()
-	if err != nil {
-		return err
-	}
-	site.Pages = make([]Page, len(pagesArray))
-	for i := range pagesArray {
-		page, err := CreatePageFromYAML(pagesArrayYAML.GetIndex(i))
-		if err != nil {
-			return fmt.Errorf("could not create page: %v", err)
-		}
-		site.Pages[i] = page
-	}
 
 	footerLinksArray, err := footerLinksArrayYAML.Array()
 	if err != nil {

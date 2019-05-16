@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"path/filepath"
-	"strings"
-	"text/template"
 )
 
 const templatesDir = "templates"
 const postsDir = "posts"
+const includesDir = "includes"
+const pagesDir = "pages"
 
 func Generate(baseURL string, inputFolder string, outputFolder string, configPath string) error {
 	// check to see if the input folder exists
@@ -40,15 +39,35 @@ func Generate(baseURL string, inputFolder string, outputFolder string, configPat
 		return fmt.Errorf("could not load config: %v", err)
 	}
 
-	site, err := createSite(baseURL, config)
+	site, err := createSite(baseURL, config, inputFolder)
 	if err != nil {
 		return fmt.Errorf("could not create site: %v", err)
 	}
 
 	fmt.Println(site)
 
+	// get includes filenames
+	includes, err := getFilesInDir(path.Join(inputFolder, includesDir), "*.html")
+	if err != nil {
+		return err
+	}
+
+	index, err := loadTemplate(path.Join(inputFolder, "index.html"), includes)
+	if err != nil {
+		return err
+	}
+
+	result, err := renderTemplate(index, site)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(result)
+
+	// copy styles folder to output
+
 	// load all templates
-	templates, err := loadAllTemplates(path.Join(inputFolder, templatesDir))
+	/*templates, err := loadAllTemplates(path.Join(inputFolder, templatesDir), includes)
 	if err != nil {
 		return err
 	}
@@ -63,14 +82,22 @@ func Generate(baseURL string, inputFolder string, outputFolder string, configPat
 
 	// get all the tags from posts
 	tags := getAllTagsFromPosts(posts)
-	for _, tag := range tags.Iterate() {
-		fmt.Println(tag)
+	fmt.Println(tags)
+
+	// get all years from posts
+	years := getAllYearsFromPosts(posts)
+	fmt.Println(years)
+
+	rendered, err := renderTemplate(templates[2], site)
+	if err != nil {
+		fmt.Printf("ERROR: %v\n", err)
 	}
+	fmt.Println(rendered)*/
+
+	// generate templates...
 
 	// Site contains EVERYTHING to generate the site
 	// templates are responsible for accessing this in the right way
-
-	// load/scan entries for tags and years/months...
 
 	// create pages (from templates by executing)...
 	// write out to files (index in folder)
@@ -83,58 +110,4 @@ func Generate(baseURL string, inputFolder string, outputFolder string, configPat
 	// create the index page
 
 	return nil
-}
-
-func loadAllTemplates(templatesDir string) ([]*template.Template, error) {
-	var loadedTemplates []*template.Template
-	templates, err := getFilesInDir(templatesDir, "*.html")
-	if err != nil {
-		return nil, err
-	}
-	for _, template := range templates {
-		loadedTemplate, err := loadTemplate(template)
-		if err != nil {
-			return nil, fmt.Errorf("could not load template '%s': %v", template, err)
-		}
-		loadedTemplates = append(loadedTemplates, loadedTemplate)
-	}
-	return loadedTemplates, nil
-}
-
-func loadTemplate(templatePath string) (*template.Template, error) {
-	// the file name is the template name, grab it without the extension
-	templateName := strings.Split(filepath.Base(templatePath), ".")[0]
-
-	templateContent, err := LoadText(templatePath)
-	if err != nil {
-		return nil, err
-	}
-
-	return template.New(templateName).Parse(templateContent)
-}
-
-func loadAllPosts(postDir string) ([]Post, error) {
-	var loadedPosts []Post
-	posts, err := getFilesInDir(postDir, "*.md")
-	if err != nil {
-		return nil, err
-	}
-	for _, post := range posts {
-		loadedPost, err := loadPost(post)
-		if err != nil {
-			return nil, fmt.Errorf("could not load post '%s': %v", post, err)
-		}
-		loadedPosts = append(loadedPosts, loadedPost)
-	}
-	return loadedPosts, nil
-}
-
-func getAllTagsFromPosts(posts []Post) *TagSet {
-	tags := NewTagSet()
-	for _, post := range posts {
-		for _, tag := range post.Header.Tags {
-			tags.Add(tag)
-		}
-	}
-	return tags
 }

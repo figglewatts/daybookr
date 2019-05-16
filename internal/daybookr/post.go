@@ -2,110 +2,111 @@ package daybookr
 
 import (
 	"fmt"
-	"strings"
 	"time"
-
-	"gopkg.in/yaml.v2"
 )
 
-// PostHeader is the header of a post
-type PostHeader struct {
-	Tags []string `yaml:",flow"`
+const (
+	tagsFieldName = "tags"
+	dateFieldName = "date"
+	iso8601Date   = "2006-01-02"
+)
+
+type Post struct {
+	Page
+	Tags []string
 	Date time.Time
 }
 
-// Post stores data that gets substituted into the post
-// template.
-type Post struct {
-	Header PostHeader
-	Body   string
+func loadAllPosts(postsDir string) ([]Post, error) {
+	var loadedPosts []Post
+	posts, err := getFilesInDir(postsDir, "*.md")
+	if err != nil {
+		return nil, err
+	}
+	for _, post := range posts {
+		loadedPost, err := loadPost(post)
+		if err != nil {
+			return nil, fmt.Errorf("could not load post '%s': %v", post, err)
+		}
+		loadedPosts = append(loadedPosts, loadedPost)
+	}
+	return loadedPosts, nil
 }
 
-// LoadPost is used to load a markdown file to a Post struct.
-func loadPost(filename string) (Post, error) {
-	newPost := Post{}
+func loadPost(postPath string) (Post, error) {
+	post := Post{}
+	page, err := loadPage(postPath)
+	post.Page = page
 
-	// load the text from the file
-	postMarkdown, err := LoadText(filename)
+	err = post.validatePostMetadata()
 	if err != nil {
 		return Post{}, err
 	}
 
-	// split the header and the body
-	header, body, err := getPostHeaderAndBody(postMarkdown)
-	if err != nil {
-		return Post{}, err
-	}
-
-	// convert the body markdown into HTML
-	newPost.Body = htmlFromMarkdown(body)
-
-	// load and validate the header
-	parsedHeader, err := loadHeader(header)
-	if err != nil {
-		return Post{}, err
-	}
-	newPost.Header = parsedHeader
-
-	return newPost, nil
+	return post, nil
 }
 
-// split a markdown post into header (YAML front matter) and body (markdown)
-// returns header (as string) and body (as string), respectively
-func getPostHeaderAndBody(post string) (string, string, error) {
-	// we want to split by the separator character, ignore empty elements,
-	// and trim the whitespace either side
-	var splitNotEmpty []string
-	for _, s := range strings.Split(post, "---") {
-		if s != "" {
-			splitNotEmpty = append(splitNotEmpty, strings.TrimSpace(s))
+func (post *Post) validatePostMetadata() error {
+	metadata := post.Metadata
+
+	// metadata must be a map
+	metadataMap, err := metadata.Map()
+	if err != nil {
+		return fmt.Errorf("malformed header: %v", err)
+	}
+
+	// the metadata must have a tags field
+	if _, ok := metadataMap[tagsFieldName]; !ok {
+		return fmt.Errorf("post metadata needs %s value", tagsFieldName)
+	}
+	// try and get the tags field
+	tagsYaml := metadata.Get(tagsFieldName)
+	tagsArr, err := tagsYaml.Array()
+	if err != nil {
+		return fmt.Errorf("post %s must be array", tagsFieldName)
+	}
+	tags := make([]string, len(tagsArr))
+	for i := range tagsArr {
+		tag, err := tagsYaml.GetIndex(i).String()
+		if err != nil {
+			return fmt.Errorf("post tag %d was not a string", i)
+		}
+		tags[i] = tag
+	}
+
+	// the metadata must have a date field
+	if _, ok := metadataMap[dateFieldName]; !ok {
+		return fmt.Errorf("post metadata needs %s value", dateFieldName)
+	}
+	// try and get the date field
+	dateStr, err := metadata.Get(dateFieldName).String()
+	if err != nil {
+		return fmt.Errorf("post %s must be string", dateFieldName)
+	}
+	date, err := time.Parse(iso8601Date, dateStr)
+	if err != nil {
+		return fmt.Errorf("malformed date: %v", err)
+	}
+
+	post.Tags = tags
+	post.Date = date
+	return nil
+}
+
+func getAllTagsFromPosts(posts []Post) map[string][]Post {
+	tags := make(map[string][]Post)
+	for _, post := range posts {
+		for _, tag := range post.Tags {
+			tags[tag] = append(tags[tag], post)
 		}
 	}
-
-	// if it's empty, the post was empty
-	if len(splitNotEmpty) == 0 {
-		return "", "", fmt.Errorf("post was empty")
-	}
-
-	// if it's equal to 1, there was either no header or no body
-	if len(splitNotEmpty) == 1 {
-		return "", "", fmt.Errorf("post needs a header AND a body")
-	}
-
-	return splitNotEmpty[0], splitNotEmpty[1], nil
+	return tags
 }
 
-// load the header YAML front matter into a PostHeader struct
-func loadHeader(headerYaml string) (PostHeader, error) {
-	header := PostHeader{}
-
-	// unmarshal the YAML into an instance of the struct
-	yamlBytes := []byte(headerYaml)
-	err := yaml.UnmarshalStrict(yamlBytes, &header)
-	if err != nil {
-		return header, fmt.Errorf("could not load post header YAML: %v", err)
+func getAllYearsFromPosts(posts []Post) map[int][]Post {
+	years := make(map[int][]Post)
+	for _, post := range posts {
+		years[post.Date.Year()] = append(years[post.Date.Year()], post)
 	}
-
-	// check to see if the unmarshaled data was valid
-	valid, reason := validateHeader(header)
-	if !valid {
-		return PostHeader{}, fmt.Errorf("post header invalid: %s", reason)
-	}
-
-	return header, nil
-}
-
-// validate a PostHeader struct to make sure all required fields are present
-func validateHeader(header PostHeader) (bool, string) {
-	// there must be at least one tag
-	if len(header.Tags) == 0 {
-		return false, "header didn't have any tags"
-	}
-
-	// there must be a date
-	if header.Date.IsZero() {
-		return false, "header didn't have date"
-	}
-
-	return true, ""
+	return years
 }

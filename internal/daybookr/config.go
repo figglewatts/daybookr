@@ -7,19 +7,17 @@ import (
 )
 
 const (
-	ConfigTitleField       = "title"
-	ConfigSubtitleField    = "subtitle"
-	ConfigAuthorField      = "author"
-	ConfigPagesField       = "pages"
-	ConfigFooterLinksField = "footer-links"
+	configTitleField       = "title"
+	configSubtitleField    = "subtitle"
+	configAuthorField      = "author"
+	configFooterLinksField = "footer-links"
 )
 
 var requiredFields = [...]string{
-	ConfigTitleField,
-	ConfigSubtitleField,
-	ConfigAuthorField,
-	ConfigPagesField,
-	ConfigFooterLinksField,
+	configTitleField,
+	configSubtitleField,
+	configAuthorField,
+	configFooterLinksField,
 }
 
 // loadConfig loads a config YAML file into a Yaml structure (from simpleyaml)

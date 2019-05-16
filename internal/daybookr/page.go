@@ -1,27 +1,113 @@
 package daybookr
 
-import "github.com/smallfish/simpleyaml"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/smallfish/simpleyaml"
+)
+
+const layoutFieldName = "layout"
 
 type Page struct {
-	Template string
+	Layout   string
+	Metadata *simpleyaml.Yaml
 	Content  string
 }
 
-const (
-	PageYAMLTemplateField = "template"
-	PageYAMLContentField  = "content"
-)
+func loadAllPages(pagesDir string) ([]Page, error) {
+	var loadedPages []Page
+	pages, err := getFilesInDir(pagesDir, "*.md")
+	if err != nil {
+		return nil, err
+	}
+	for _, page := range pages {
+		loadedPage, err := loadPage(page)
+		if err != nil {
+			return nil, fmt.Errorf("could not load page '%s': %v", page, err)
+		}
+		loadedPages = append(loadedPages, loadedPage)
+	}
+	return loadedPages, nil
+}
 
-func CreatePageFromYAML(yaml *simpleyaml.Yaml) (Page, error) {
-	template, err := yaml.Get(PageYAMLTemplateField).String()
+func loadPage(pagePath string) (Page, error) {
+	// load the page's text
+	pageText, err := LoadText(pagePath)
 	if err != nil {
 		return Page{}, err
 	}
 
-	content, err := yaml.Get(PageYAMLContentField).String()
+	// split into header and body
+	header, body, err := getPageHeaderAndBody(pageText)
 	if err != nil {
 		return Page{}, err
 	}
 
-	return Page{Template: template, Content: content}, nil
+	// load the header
+	pageLayout, metadata, err := loadPageHeader(header)
+	if err != nil {
+		return Page{}, err
+	}
+
+	// convert the page body into HTML
+	pageBody := htmlFromMarkdown(body)
+
+	return Page{
+		Layout:   pageLayout,
+		Metadata: metadata,
+		Content:  pageBody,
+	}, nil
+}
+
+// split a markdown page into header (YAML front matter) and body (markdown)
+// returns header (as string) and body (as string), respectively
+func getPageHeaderAndBody(page string) (string, string, error) {
+	// we want to split by the separator character, ignore empty elements,
+	// and trim the whitespace either side
+	var splitNotEmpty []string
+	for _, s := range strings.Split(page, "---") {
+		if s != "" {
+			splitNotEmpty = append(splitNotEmpty, strings.TrimSpace(s))
+		}
+	}
+
+	// if it's empty, the post was empty
+	if len(splitNotEmpty) == 0 {
+		return "", "", fmt.Errorf("page was empty")
+	}
+
+	// if it's equal to 1, there was either no header or no body
+	if len(splitNotEmpty) == 1 {
+		return "", "", fmt.Errorf("page needs a header AND a body")
+	}
+
+	return splitNotEmpty[0], splitNotEmpty[1], nil
+}
+
+func loadPageHeader(pageHeader string) (string, *simpleyaml.Yaml, error) {
+	headerBytes := []byte(pageHeader)
+	yaml, err := simpleyaml.NewYaml(headerBytes)
+	if err != nil {
+		return "", nil, err
+	}
+
+	// see if the YAML can be converted into a map or not... we need it to be
+	yamlAsMap, err := yaml.Map()
+	if err != nil {
+		return "", nil, fmt.Errorf("malformed header: %v", err)
+	}
+
+	// the YAML must have a layout field
+	if _, ok := yamlAsMap[layoutFieldName]; !ok {
+		return "", nil, fmt.Errorf("header needs %s value", layoutFieldName)
+	}
+
+	// try and get the layout field
+	layout, err := yaml.Get(layoutFieldName).String()
+	if err != nil {
+		return "", nil, fmt.Errorf("header %s field must be string: %v", layoutFieldName, err)
+	}
+
+	return layout, yaml, nil
 }

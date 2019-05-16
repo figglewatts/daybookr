@@ -31,6 +31,7 @@ func CreateLinkFromYAML(yaml *simpleyaml.Yaml) (Link, error) {
 	if err != nil {
 		return Link{}, err
 	}
+
 	target, err := yaml.Get(LinkYAMLTargetField).String()
 	if err != nil {
 		return Link{}, err
