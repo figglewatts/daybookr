@@ -7,6 +7,12 @@
     {{template "header.html" .Site}}
 
     <article>
+        <h1>{{.Page.Title}}</h1>
+
+        {{range .Tags}}
+            <a href="#">{{.}}</a>
+        {{end}}
+
         {{.Content}}
     </article>
 

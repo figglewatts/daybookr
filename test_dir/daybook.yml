@@ -3,6 +3,7 @@ subtitle: This is my journal
 author: Figglewatts
 footer-links:
   - text: "Twitter"
-    target: "www.twitter.com"
+    target: "https://www.twitter.com"
   - text: "Google"
-    target: "www.google.com"
+    target: "https://www.google.com"
+data-folders: [ styles ]

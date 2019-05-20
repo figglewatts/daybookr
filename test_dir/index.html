@@ -6,8 +6,14 @@
 <body>
     {{template "header.html" .}}
 
-    <p>There is content here.</p>
-
+    <article>
+        <ul>
+        {{range .Posts}}
+            <li><a href="{{.Name}}.html">{{.Title}}</a></li>
+        {{end}}
+        </ul>
+    </article>
+    
     {{template "footer.html" .}}
 </body>
 

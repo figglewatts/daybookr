@@ -2,6 +2,8 @@ package daybookr
 
 import (
 	"fmt"
+	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/smallfish/simpleyaml"
@@ -13,16 +15,19 @@ type Page struct {
 	Layout   string
 	Metadata *simpleyaml.Yaml
 	Content  string
+	Name     string
+	Title    string
+	Site     *Site
 }
 
-func loadAllPages(pagesDir string) ([]Page, error) {
+func loadAllPages(pagesDir string, site *Site) ([]Page, error) {
 	var loadedPages []Page
 	pages, err := getFilesInDir(pagesDir, "*.md")
 	if err != nil {
 		return nil, err
 	}
 	for _, page := range pages {
-		loadedPage, err := loadPage(page)
+		loadedPage, err := loadPage(page, site)
 		if err != nil {
 			return nil, fmt.Errorf("could not load page '%s': %v", page, err)
 		}
@@ -31,7 +36,7 @@ func loadAllPages(pagesDir string) ([]Page, error) {
 	return loadedPages, nil
 }
 
-func loadPage(pagePath string) (Page, error) {
+func loadPage(pagePath string, site *Site) (Page, error) {
 	// load the page's text
 	pageText, err := LoadText(pagePath)
 	if err != nil {
@@ -53,10 +58,19 @@ func loadPage(pagePath string) (Page, error) {
 	// convert the page body into HTML
 	pageBody := htmlFromMarkdown(body)
 
+	// the page name is the filename without the extension
+	pageName := path.Base(pagePath)
+	pageName = strings.TrimSuffix(pageName, filepath.Ext(pageName))
+
+	pageTitle := strings.Title(pageName) + " – " + site.Title
+
 	return Page{
 		Layout:   pageLayout,
 		Metadata: metadata,
 		Content:  pageBody,
+		Name:     pageName,
+		Site:     site,
+		Title:    pageTitle,
 	}, nil
 }
 

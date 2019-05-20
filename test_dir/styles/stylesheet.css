@@ -1,0 +1,141 @@
+/* ----- SITEWIDE STYLING ----- */
+body {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 50em;
+    margin: 0 auto;
+    font-family: 'Fira Code', monospace;
+}
+
+/* ----- UTILITY CLASSES ----- */
+span.nowrap {
+    white-space: nowrap;
+    display: inline;
+}
+
+/* ----- HEADER STYLING ----- */
+body header {
+    height: 4em;
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+body header h1 {
+    font-size: 2em;
+    display: inline;
+}
+
+body header h2 {
+    font-size: 1em;
+    display: inline;
+    margin-left: 1em;
+    color: #555555;
+}
+
+body header hr {
+    margin-top: 1.5em;
+}
+
+body header nav {
+    margin-top: 0.5em;
+}
+
+body header nav * {
+    display: inline;
+    margin-right: 2em;
+}
+
+/* ----- FOOTER STYLING ----- */
+body footer {
+    height: 3em;
+    margin-top: 3em;
+    margin-bottom: 1em;
+}
+
+body footer nav {
+    float: right;
+}
+
+body footer nav * {
+    display: inline;
+    margin-right: 2em;
+}
+
+/* ----- ARTICLE STYLING ----- */
+body article {
+    flex: 1;
+}
+
+body article ul {
+    list-style-type: none;
+}
+body article ul li:before {
+    content: '-';
+    padding-right: 0.5em;
+}
+body article ol {
+    padding-left: 3.5em;
+}
+body article ol ol {
+    list-style-type: lower-alpha;
+}
+body article ol ol ol {
+    list-style-type: lower-roman;
+}
+body article li p {
+    display: inline;
+}
+body article li a {
+    word-break: break-all;
+}
+
+body article blockquote {
+    border-left: 1px #adadad;
+    border-left-style: solid;
+    padding-left: 1em;
+    color: #666;
+}
+
+body article pre {
+    background: #000;
+    color: #FFFFFF;
+    margin-left: 4em;
+    padding: 1em;
+}
+
+body article :not(pre) code {
+    background: #111111;
+    color: #FFFFFF;
+    padding: 0.3em;
+    border-radius: 3px;
+}
+
+body article h1 {
+    margin-block-end: 0.1em;
+}
+body article h2 {
+    margin-block-end: 0.1em;
+}
+body article h3 {
+    margin-block-end: 0.1em;
+}
+body article h4 {
+    margin-block-end: 0.1em;
+}
+body article h5 {
+    margin-block-end: 0.1em;
+}
+body article h6 {
+    margin-block-end: 0.1em;
+}
+body article ul {
+    margin-block-start: 0.2em;
+}
+body article ol {
+    margin-block-start: 0.2em;
+}
+body article p {
+    margin-block-start: 0.2em;
+}

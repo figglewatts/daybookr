@@ -53,7 +53,6 @@ COPYRIGHT:
 
 ## Todo
 - Header links in config
-- Render site pages based on template combination and config
 - Pagination for long pages
 - Templates
    - Front page
@@ -61,6 +60,6 @@ COPYRIGHT:
    - Tag archive
    - Entry
 - Generate front page (with all posts)
-- Generate bespoke pages from config
 - Generate archive page
 - Generate tag pages
+- Pass useful functions to template with FuncMap

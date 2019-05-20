@@ -4,21 +4,25 @@ import (
 	"fmt"
 	"net/url"
 	"path"
+	"sort"
+	"strings"
+	"time"
 
 	"github.com/smallfish/simpleyaml"
 )
 
 // TODO(sam): fields for archives
 type Site struct {
-	Title       string
-	Subtitle    string
-	Author      string
-	Pages       []Page
-	Posts       []Post
-	HeaderLinks []Link
-	FooterLinks []Link
-	Conf        simpleyaml.Yaml
-	BaseURL     *url.URL
+	Title          string
+	Subtitle       string
+	Author         string
+	Pages          []Page
+	Posts          []Post
+	HeaderLinks    []Link
+	FooterLinks    []Link
+	Conf           simpleyaml.Yaml
+	BaseURL        *url.URL
+	GenerationTime time.Time
 }
 
 func (site Site) MakeSiteURL(relativeURL string) (*url.URL, error) {
@@ -42,17 +46,24 @@ func createSite(baseURL string, config *simpleyaml.Yaml, inputDir string) (Site,
 	}
 	site.BaseURL = createdBaseURL
 
-	pages, err := loadAllPages(path.Join(inputDir, pagesDir))
+	pages, err := loadAllPages(path.Join(inputDir, pagesDir), &site)
 	if err != nil {
 		return Site{}, fmt.Errorf("could not load pages: %v", err)
 	}
 	site.Pages = pages
 
-	posts, err := loadAllPosts(path.Join(inputDir, postsDir))
+	posts, err := loadAllPosts(path.Join(inputDir, postsDir), &site)
 	if err != nil {
 		return Site{}, fmt.Errorf("could not load posts: %v", err)
 	}
+
+	// sort posts by date (most recent first)
+	sort.Slice(posts, func(i, j int) bool {
+		return posts[i].Date.After(posts[j].Date)
+	})
 	site.Posts = posts
+
+	site.GenerationTime = time.Now()
 
 	return site, nil
 }
@@ -73,7 +84,7 @@ func (site *Site) populateWithConfig(config *simpleyaml.Yaml) error {
 
 	footerLinksArrayYAML := config.Get(configFooterLinksField)
 
-	site.Title = title
+	site.Title = strings.Title(title)
 	site.Subtitle = subtitle
 	site.Author = author
 

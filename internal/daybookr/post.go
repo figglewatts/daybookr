@@ -8,7 +8,13 @@ import (
 const (
 	tagsFieldName = "tags"
 	dateFieldName = "date"
-	iso8601Date   = "2006-01-02"
+
+	// go has weird ways of specifying date formatting
+	// this one adheres to ISO-8601
+	iso8601Date = "2006-01-02"
+
+	// this one makes it nicely human readable
+	humanDate = "Monday, 2 January, 2006"
 )
 
 type Post struct {
@@ -17,25 +23,38 @@ type Post struct {
 	Date time.Time
 }
 
-func loadAllPosts(postsDir string) ([]Post, error) {
+func loadAllPosts(postsDir string, site *Site) ([]Post, error) {
+	existingPosts := make(map[time.Time]Post)
+
 	var loadedPosts []Post
 	posts, err := getFilesInDir(postsDir, "*.md")
 	if err != nil {
 		return nil, err
 	}
 	for _, post := range posts {
-		loadedPost, err := loadPost(post)
+		loadedPost, err := loadPost(post, site)
 		if err != nil {
 			return nil, fmt.Errorf("could not load post '%s': %v", post, err)
 		}
-		loadedPosts = append(loadedPosts, loadedPost)
+
+		// deduplicate posts with the same date
+		if val, ok := existingPosts[loadedPost.Date]; ok {
+			val.combine(loadedPost)
+		} else {
+			existingPosts[loadedPost.Date] = loadedPost
+		}
 	}
+
+	for _, v := range existingPosts {
+		loadedPosts = append(loadedPosts, v)
+	}
+
 	return loadedPosts, nil
 }
 
-func loadPost(postPath string) (Post, error) {
+func loadPost(postPath string, site *Site) (Post, error) {
 	post := Post{}
-	page, err := loadPage(postPath)
+	page, err := loadPage(postPath, site)
 	post.Page = page
 
 	err = post.validatePostMetadata()
@@ -43,7 +62,18 @@ func loadPost(postPath string) (Post, error) {
 		return Post{}, err
 	}
 
+	// override the title with the date as a human-readable string
+	post.Title = post.Date.Format(humanDate)
+
+	// override the name with the date as a string
+	post.Name = post.Date.Format(iso8601Date)
+
 	return post, nil
+}
+
+func (post *Post) combine(other Post) {
+	post.Content += "\n" + other.Content
+	post.Tags = append(post.Tags, other.Tags...)
 }
 
 func (post *Post) validatePostMetadata() error {
