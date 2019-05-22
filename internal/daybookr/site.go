@@ -11,14 +11,13 @@ import (
 	"github.com/smallfish/simpleyaml"
 )
 
-// TODO(sam): fields for archives
 type Site struct {
 	Title          string
 	Subtitle       string
 	Author         string
 	Pages          []Page
 	Posts          []Post
-	HeaderLinks    []Link
+	Tags           map[string][]Post
 	FooterLinks    []Link
 	Conf           simpleyaml.Yaml
 	BaseURL        *url.URL
@@ -51,6 +50,8 @@ func createSite(baseURL string, config *simpleyaml.Yaml, inputDir string) (Site,
 		return Site{}, fmt.Errorf("could not load pages: %v", err)
 	}
 	site.Pages = pages
+
+	site.Tags = make(map[string][]Post)
 
 	posts, err := loadAllPosts(path.Join(inputDir, postsDir), &site)
 	if err != nil {

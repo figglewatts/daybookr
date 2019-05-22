@@ -7,3 +7,4 @@ footer-links:
   - text: "Google"
     target: "https://www.google.com"
 data-folders: [ styles ]
+data-files: [ robots.txt ]

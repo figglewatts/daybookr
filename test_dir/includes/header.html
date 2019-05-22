@@ -1,11 +1,11 @@
 <header>
     <span class="nowrap">
-        <h1>{{.Title}}</h1>
+        <h1><a href="index.html">{{.Title}}</a></h1>
         <h2>{{.Subtitle}}</h2>
     </span>
     <nav>
-        {{range .HeaderLinks}}
-        <a href="{{.Target.String}}">{{.Text}}</a>
+        {{range .Pages}}
+        <a href="{{.Name}}.html">{{Title .Name}}</a>
         {{end}}
     </nav>
     <hr />

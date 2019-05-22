@@ -62,7 +62,7 @@ func loadPage(pagePath string, site *Site) (Page, error) {
 	pageName := path.Base(pagePath)
 	pageName = strings.TrimSuffix(pageName, filepath.Ext(pageName))
 
-	pageTitle := strings.Title(pageName) + " – " + site.Title
+	pageTitle := strings.Title(pageName)
 
 	return Page{
 		Layout:   pageLayout,

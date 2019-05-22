@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 
 	"github.com/otiai10/copy"
 
@@ -45,6 +46,13 @@ func Generate(baseURL string, inputFolder string, outputFolder string, configPat
 		return fmt.Errorf("could not load data folders: %v", err)
 	}
 
+	// get data files from config
+	dataFiles, err := getDataFilesFromConfig(config, inputFolder)
+	if err != nil {
+		return fmt.Errorf("could not load data files: %v", err)
+	}
+
+	// create site struct to store site data (for populating templates)
 	site, err := createSite(baseURL, config, inputFolder)
 	if err != nil {
 		return fmt.Errorf("could not create site: %v", err)
@@ -75,6 +83,9 @@ func Generate(baseURL string, inputFolder string, outputFolder string, configPat
 
 	// now load site layouts
 	layouts, err := loadAllTemplates(path.Join(inputFolder, layoutsDir), includes)
+	if err != nil {
+		return fmt.Errorf("error loading layouts: %v", err)
+	}
 
 	// render all of the pages
 	for _, page := range site.Pages {
@@ -113,7 +124,13 @@ func Generate(baseURL string, inputFolder string, outputFolder string, configPat
 	}
 
 	// copy data folders to output
-	err = copyDataFoldersToOutput(dataFolders, outputFolder)
+	err = copyToOutput(dataFolders, inputFolder, outputFolder)
+	if err != nil {
+		return err
+	}
+
+	// copy data files to output
+	err = copyToOutput(dataFiles, inputFolder, outputFolder)
 	if err != nil {
 		return err
 	}
@@ -138,13 +155,32 @@ func getDataFoldersFromConfig(config *simpleyaml.Yaml, inputPath string) ([]stri
 	return dataFolders, nil
 }
 
-func copyDataFoldersToOutput(dataFolders []string, outputFolder string) error {
-	for _, folder := range dataFolders {
-		folderName := path.Base(folder)
-		outputFolder := path.Join(outputFolder, folderName)
-		err := copy.Copy(folder, outputFolder)
+func getDataFilesFromConfig(config *simpleyaml.Yaml, inputPath string) ([]string, error) {
+	dataFilesYAML := config.Get(configDataFilesField)
+	dataFilesArr, err := dataFilesYAML.Array()
+	if err != nil {
+		return nil, fmt.Errorf("%s was not of array type", configDataFilesField)
+	}
+	dataFiles := make([]string, len(dataFilesArr))
+	for i := range dataFilesArr {
+		folder, err := dataFilesYAML.GetIndex(i).String()
 		if err != nil {
-			return fmt.Errorf("error copying data folder %s: %v", folderName, err)
+			return nil, fmt.Errorf("file %d was not of string type", i)
+		}
+		dataFiles[i] = path.Join(inputPath, folder)
+	}
+	return dataFiles, nil
+}
+
+func copyToOutput(paths []string, inputFolder string, outputFolder string) error {
+	for _, p := range paths {
+		name, err := filepath.Rel(inputFolder, p)
+		if err != nil {
+			return err
+		}
+		err = copy.Copy(path.Join(inputFolder, name), path.Join(outputFolder, name))
+		if err != nil {
+			return fmt.Errorf("error copying '%s' to output: %v", name, err)
 		}
 	}
 	return nil

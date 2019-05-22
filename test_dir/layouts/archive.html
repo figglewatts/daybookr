@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+
+{{template "head.html" .Site}}
+
+<body>
+    {{template "header.html" .Site}}
+
+    <article>
+        
+        {{range $year, $postList := PostsByYear .Site}}
+            <h1 id={{$year}}>{{$year}}</h1>
+            <ul>
+            {{range $postList}}
+                <li><a href={{.Name}}>{{.Title}}</a></li>
+            {{end}}
+            </ul>
+        {{end}}
+
+    </article>
+
+    {{template "footer.html" .Site}}
+</body>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+
+{{template "head.html" .Site}}
+
+<body>
+    {{template "header.html" .Site}}
+
+    <article>
+        
+        {{range $tag, $postList := .Site.Tags}}
+            <h1 id={{$tag}}>{{$tag}}</h1>
+            <ul>
+            {{range $postList}}
+                <li><a href="{{.Name}}.html">{{.Title}}</a></li>
+            {{end}}
+            </ul>
+        {{end}}
+
+    </article>
+
+    {{template "footer.html" .Site}}
+</body>

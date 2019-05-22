@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 
-{{template "head.html" .}}
+{{template "head.html" .Site}}
 
 <body>
     {{template "header.html" .Site}}
@@ -10,7 +10,7 @@
         <h1>{{.Page.Title}}</h1>
 
         {{range .Tags}}
-            <a href="#">{{.}}</a>
+            <a href="tags.html#{{.}}">{{.}}</a>
         {{end}}
 
         {{.Content}}

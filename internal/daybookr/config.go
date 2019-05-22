@@ -12,6 +12,7 @@ const (
 	configAuthorField      = "author"
 	configFooterLinksField = "footer-links"
 	configDataFoldersField = "data-folders"
+	configDataFilesField   = "data-files"
 )
 
 var requiredFields = [...]string{
@@ -20,6 +21,7 @@ var requiredFields = [...]string{
 	configAuthorField,
 	configFooterLinksField,
 	configDataFoldersField,
+	configDataFilesField,
 }
 
 // loadConfig loads a config YAML file into a Yaml structure (from simpleyaml)

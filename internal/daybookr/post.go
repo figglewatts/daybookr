@@ -23,6 +23,12 @@ type Post struct {
 	Date time.Time
 }
 
+func (post Post) combine(other Post) Post {
+	post.Content += "\n" + other.Content
+	post.Tags = append(post.Tags, other.Tags...)
+	return post
+}
+
 func loadAllPosts(postsDir string, site *Site) ([]Post, error) {
 	existingPosts := make(map[time.Time]Post)
 
@@ -39,10 +45,9 @@ func loadAllPosts(postsDir string, site *Site) ([]Post, error) {
 
 		// deduplicate posts with the same date
 		if val, ok := existingPosts[loadedPost.Date]; ok {
-			val.combine(loadedPost)
-		} else {
-			existingPosts[loadedPost.Date] = loadedPost
+			loadedPost = val.combine(loadedPost)
 		}
+		existingPosts[loadedPost.Date] = loadedPost
 	}
 
 	for _, v := range existingPosts {
@@ -57,7 +62,9 @@ func loadPost(postPath string, site *Site) (Post, error) {
 	page, err := loadPage(postPath, site)
 	post.Page = page
 
-	err = post.validatePostMetadata()
+	tags, time, err := getPostMetadata(post)
+	post.Tags = tags
+	post.Date = time
 	if err != nil {
 		return Post{}, err
 	}
@@ -68,59 +75,57 @@ func loadPost(postPath string, site *Site) (Post, error) {
 	// override the name with the date as a string
 	post.Name = post.Date.Format(iso8601Date)
 
+	// register the tags with the site
+	for _, tag := range post.Tags {
+		site.Tags[tag] = append(site.Tags[tag], post)
+	}
+
 	return post, nil
 }
 
-func (post *Post) combine(other Post) {
-	post.Content += "\n" + other.Content
-	post.Tags = append(post.Tags, other.Tags...)
-}
-
-func (post *Post) validatePostMetadata() error {
+func getPostMetadata(post Post) ([]string, time.Time, error) {
 	metadata := post.Metadata
 
 	// metadata must be a map
 	metadataMap, err := metadata.Map()
 	if err != nil {
-		return fmt.Errorf("malformed header: %v", err)
+		return nil, time.Time{}, fmt.Errorf("malformed header: %v", err)
 	}
 
 	// the metadata must have a tags field
 	if _, ok := metadataMap[tagsFieldName]; !ok {
-		return fmt.Errorf("post metadata needs %s value", tagsFieldName)
+		return nil, time.Time{}, fmt.Errorf("post metadata needs %s value", tagsFieldName)
 	}
 	// try and get the tags field
 	tagsYaml := metadata.Get(tagsFieldName)
 	tagsArr, err := tagsYaml.Array()
 	if err != nil {
-		return fmt.Errorf("post %s must be array", tagsFieldName)
+		return nil, time.Time{}, fmt.Errorf("post %s must be array", tagsFieldName)
 	}
 	tags := make([]string, len(tagsArr))
 	for i := range tagsArr {
 		tag, err := tagsYaml.GetIndex(i).String()
 		if err != nil {
-			return fmt.Errorf("post tag %d was not a string", i)
+			return nil, time.Time{}, fmt.Errorf("post tag %d was not a string", i)
 		}
 		tags[i] = tag
 	}
 
 	// the metadata must have a date field
 	if _, ok := metadataMap[dateFieldName]; !ok {
-		return fmt.Errorf("post metadata needs %s value", dateFieldName)
+		return nil, time.Time{}, fmt.Errorf("post metadata needs %s value", dateFieldName)
 	}
 	// try and get the date field
 	dateStr, err := metadata.Get(dateFieldName).String()
 	if err != nil {
-		return fmt.Errorf("post %s must be string", dateFieldName)
+		return nil, time.Time{}, fmt.Errorf("post %s must be string", dateFieldName)
 	}
 	date, err := time.Parse(iso8601Date, dateStr)
 	if err != nil {
-		return fmt.Errorf("malformed date: %v", err)
+		return nil, time.Time{}, fmt.Errorf("malformed date: %v", err)
 	}
 
-	post.Tags = tags
-	post.Date = date
-	return nil
+	return tags, date, nil
 }
 
 func getAllTagsFromPosts(posts []Post) map[string][]Post {

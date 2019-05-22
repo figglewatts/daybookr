@@ -52,14 +52,7 @@ COPYRIGHT:
    - index is a page at the root of the folder, will be templated from Site struct
 
 ## Todo
-- Header links in config
 - Pagination for long pages
-- Templates
-   - Front page
-   - Entry archive
-   - Tag archive
-   - Entry
 - Generate front page (with all posts)
-- Generate archive page
-- Generate tag pages
-- Pass useful functions to template with FuncMap
+- Years are not sorted on the archive page
+- Tags are not sorted on the tags page

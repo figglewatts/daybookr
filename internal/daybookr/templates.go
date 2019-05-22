@@ -23,6 +23,7 @@ func loadAllTemplates(templatesDir string, includes []string) (map[string]*templ
 	for _, template := range templates {
 		loadedTemplate, err := loadTemplate(template, includes)
 		if err != nil {
+			fmt.Println("err")
 			return nil, fmt.Errorf("could not load template '%s': %v", template, err)
 		}
 		// template name is template filename without extension
@@ -42,16 +43,26 @@ func loadTemplate(templatePath string, includes []string) (*template.Template, e
 		return nil, err
 	}
 
-	template, err := template.New(templateName).Parse(templateContent)
+	templateLoaded, err := template.New(templateName).Funcs(createFuncMap()).Parse(templateContent)
 	if err != nil {
 		return nil, err
 	}
 
 	// now load the includes into this template
-	template, err = template.ParseFiles(includes...)
+	templateLoaded, err = templateLoaded.ParseFiles(includes...)
 	if err != nil {
 		return nil, fmt.Errorf("unable to load template includes: %v", err)
 	}
 
-	return template, err
+	return templateLoaded, nil
+}
+
+func createFuncMap() template.FuncMap {
+	return template.FuncMap{
+		"Title":       strings.Title,
+		"From":        From,
+		"To":          To,
+		"FromTo":      FromTo,
+		"PostsByYear": PostsByYear,
+	}
 }
