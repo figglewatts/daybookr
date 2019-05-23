@@ -1,6 +1,7 @@
 package daybookr
 
 import (
+	"bufio"
 	"fmt"
 	"path"
 	"path/filepath"
@@ -12,12 +13,55 @@ import (
 const layoutFieldName = "layout"
 
 type Page struct {
-	Layout   string
-	Metadata *simpleyaml.Yaml
-	Content  string
-	Name     string
-	Title    string
-	Site     *Site
+	Layout     string
+	Metadata   *simpleyaml.Yaml
+	RawContent string
+	Content    string
+	Name       string
+	Title      string
+	Site       *Site
+}
+
+func (page Page) GetHTMLPreview(chars int) string {
+	// find first instance of text that isn't a heading
+	// append until chars or next heading
+	textAlphabet := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+	var builder strings.Builder
+	stringScanner := bufio.NewScanner(strings.NewReader(page.RawContent))
+	foundText := false
+	for stringScanner.Scan() {
+		// if we're over the number of chars, truncate with ellipsis
+		if builder.Len() >= chars {
+			builder.WriteString("...")
+			return htmlFromMarkdown(strings.TrimSpace(builder.String()))
+		}
+
+		line := stringScanner.Text()
+		if len(line) == 0 {
+			builder.WriteString("\n\n")
+			continue
+		}
+
+		// if the char is a heading and we haven't found text yet, skip it
+		if !foundText && line[0] == '#' {
+			continue
+		} else if !foundText && strings.ContainsRune(textAlphabet, rune(line[0])) {
+			// otherwise if the char is an alpha then we have found text
+			foundText = true
+		} else if foundText && line[0] == '#' {
+			break
+		}
+
+		for _, c := range line {
+			if builder.Len()+1 > chars {
+				builder.WriteString("...")
+				return htmlFromMarkdown(strings.TrimSpace(builder.String()))
+			}
+			builder.WriteRune(c)
+		}
+		builder.WriteRune('\n')
+	}
+	return htmlFromMarkdown(strings.TrimSpace(builder.String()))
 }
 
 func loadAllPages(pagesDir string, site *Site) ([]Page, error) {
@@ -65,17 +109,18 @@ func loadPage(pagePath string, site *Site) (Page, error) {
 	pageTitle := strings.Title(pageName)
 
 	return Page{
-		Layout:   pageLayout,
-		Metadata: metadata,
-		Content:  pageBody,
-		Name:     pageName,
-		Site:     site,
-		Title:    pageTitle,
+		Layout:     pageLayout,
+		Metadata:   metadata,
+		RawContent: body,
+		Content:    pageBody,
+		Name:       pageName,
+		Site:       site,
+		Title:      pageTitle,
 	}, nil
 }
 
 // split a markdown page into header (YAML front matter) and body (markdown)
-// returns header (as string) and body (as string), respectively
+// returns header (as string) and body (as string), respecti vely
 func getPageHeaderAndBody(page string) (string, string, error) {
 	// we want to split by the separator character, ignore empty elements,
 	// and trim the whitespace either side

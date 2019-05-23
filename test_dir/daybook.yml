@@ -8,3 +8,4 @@ footer-links:
     target: "https://www.google.com"
 data-folders: [ styles ]
 data-files: [ robots.txt ]
+number-of-recent-posts: 15

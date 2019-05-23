@@ -2,7 +2,6 @@ package daybookr
 
 import (
 	"fmt"
-	"net/url"
 	"path"
 	"sort"
 	"strings"
@@ -19,8 +18,7 @@ type Site struct {
 	Posts          []Post
 	Tags           []tag
 	FooterLinks    []Link
-	Conf           simpleyaml.Yaml
-	BaseURL        *url.URL
+	Conf           *simpleyaml.Yaml
 	GenerationTime time.Time
 }
 
@@ -29,26 +27,19 @@ type tag struct {
 	Posts []Post
 }
 
-func (site Site) MakeSiteURL(relativeURL string) (*url.URL, error) {
-	urlString := path.Join(site.BaseURL.Path, relativeURL)
-	url, err := url.Parse(urlString)
-	if err != nil {
-		return nil, err
+func (site Site) PostsTo(count int) []Post {
+	if count > len(site.Posts) {
+		count = len(site.Posts)
 	}
-	return url, nil
+	return site.Posts[:count]
 }
 
-func createSite(baseURL string, config *simpleyaml.Yaml, inputDir string) (Site, error) {
+func createSite(config *simpleyaml.Yaml, inputDir string) (Site, error) {
 	site := Site{}
 	err := site.populateWithConfig(config)
 	if err != nil {
 		return Site{}, fmt.Errorf("unable to create site from config: %v", err)
 	}
-	createdBaseURL, err := makeURL(baseURL)
-	if err != nil {
-		return Site{}, fmt.Errorf("invalid base URL: %v", err)
-	}
-	site.BaseURL = createdBaseURL
 
 	pages, err := loadAllPages(path.Join(inputDir, pagesDir), &site)
 	if err != nil {
@@ -136,6 +127,8 @@ func (site *Site) populateWithConfig(config *simpleyaml.Yaml) error {
 		}
 		site.FooterLinks[i] = link
 	}
+
+	site.Conf = config
 
 	return nil
 }

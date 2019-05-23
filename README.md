@@ -17,10 +17,10 @@ NAME:
    daybookr - generate a journal based on some content, config and templates
 
 USAGE:
-   daybookr [global options] <BASE-URL>
+   daybookr [global options]
 
 VERSION:
-   0.1
+   1.0
 
 AUTHOR:
    Figglewatts
@@ -39,21 +39,22 @@ COPYRIGHT:
    (c) 2019 Figglewatts
 ```
 
-## Design
-- includes folder that are loaded for every template
-- pages in pages folder in root
-- layouts
-   - layouts of pages are HTML files with templated values available in Page struct
-   - pages say which layout they want to use in YAML front matter
-   - posts say which layout they want to use in YAML front matter (the same...)
-   - template loaded with template.ParseFiles(layout, content)
-   - executed against Page struct
-- handling index
-   - index is a page at the root of the folder, will be templated from Site struct
+## Advanced usage
 
-## Todo
-- Pagination for long pages
-- Generate front page (with all posts)
-- Years are not sorted on the archive page
-- Tags are not sorted on the tags page
-- Potential for removal of site base url?
+### Using custom config fields in layouts
+If you have custom fields in your `daybook.yml` file, i.e.:
+```yaml
+custom_field: this is a string
+```
+These can be accessed in a layout by doing something like this:
+```html
+<h1>{{(.Site.Conf.Get "custom_field").String}}</h1>
+```
+Resulting in:
+```html
+<h1>this is a string</h1>
+```
+The config file is parsed with the [simpleyaml](https://github.com/smallfish/simpleyaml) package. For more information on how to get all kinds of YAML values from the config file (i.e. not just a string as above), please see their documentation.
+
+# Todo
+- Documentation

@@ -3,13 +3,19 @@
 
 {{template "head.html" .}}
 
+{{$postsPerPage := (.Conf.Get "number-of-recent-posts").Int}}
+
 <body>
     {{template "header.html" .}}
 
     <article>
+        <h1>Last {{$postsPerPage}} posts</h1>
         <ul>
-        {{range .Posts}}
-            <li><a href="{{.Name}}.html">{{.Title}}</a></li>
+        {{range .PostsTo $postsPerPage}}
+            <li class="post">
+                <a href="{{.Name}}.html">{{.Title}}</a>
+                {{.GetHTMLPreview 200}}
+            </li>
         {{end}}
         </ul>
     </article>

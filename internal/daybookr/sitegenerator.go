@@ -17,7 +17,7 @@ const postsDir = "posts"
 const includesDir = "includes"
 const pagesDir = "pages"
 
-func Generate(baseURL string, inputFolder string, outputFolder string, configPath string) error {
+func Generate(inputFolder string, outputFolder string, configPath string) error {
 	// check to see if the input folder exists
 	inputFolderExists, err := exists(inputFolder)
 	if err != nil || !inputFolderExists {
@@ -53,7 +53,7 @@ func Generate(baseURL string, inputFolder string, outputFolder string, configPat
 	}
 
 	// create site struct to store site data (for populating templates)
-	site, err := createSite(baseURL, config, inputFolder)
+	site, err := createSite(config, inputFolder)
 	if err != nil {
 		return fmt.Errorf("could not create site: %v", err)
 	}

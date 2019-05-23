@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -9,14 +8,6 @@ import (
 
 	"github.com/figglewatts/daybookr/internal/daybookr"
 	"gopkg.in/urfave/cli.v1"
-)
-
-type daybookrArgs struct {
-	BaseURL string
-}
-
-const (
-	baseURLArgIndex = iota
 )
 
 type daybookrFlags struct {
@@ -34,17 +25,6 @@ const (
 	configPathShortName   = "c"
 )
 
-func getArgs(c *cli.Context) (daybookrArgs, error) {
-	baseURL := c.Args().Get(baseURLArgIndex)
-	if baseURL == "" {
-		return daybookrArgs{}, errors.New("required positional argument 'BASE-URL' must be present")
-	}
-
-	return daybookrArgs{
-		BaseURL: baseURL,
-	}, nil
-}
-
 func getFlags(c *cli.Context) daybookrFlags {
 	inputFolder := c.String(inputFolderShortName)
 	return daybookrFlags{
@@ -55,20 +35,16 @@ func getFlags(c *cli.Context) daybookrFlags {
 }
 
 func runDaybookr(c *cli.Context) error {
-	// parse command line args
-	args, err := getArgs(c)
-	if err != nil {
-		return err
-	}
-
 	// get optional flags
 	flags := getFlags(c)
 
 	// generate the site
-	err = daybookr.Generate(args.BaseURL, flags.InputFolder, flags.OutputFolder, flags.ConfigPath)
+	err := daybookr.Generate(flags.InputFolder, flags.OutputFolder, flags.ConfigPath)
 	if err != nil {
 		return err
 	}
+
+	fmt.Printf("Successfully generated site in %s\n", flags.OutputFolder)
 
 	return nil
 }
@@ -77,11 +53,10 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "daybookr"
 	app.Usage = "generate a journal based on some content, config and templates"
-	app.UsageText = "daybookr [global options] <BASE-URL>"
-	app.ArgsUsage = "BASE-URL - the URL that is the base of your site, used when making URLs, i.e. https://yoursite.com"
+	app.UsageText = "daybookr [global options]"
 	app.Action = runDaybookr
 	app.Author = "Figglewatts"
-	app.Version = "0.1"
+	app.Version = "1.0"
 	app.Compiled = time.Now()
 	app.Copyright = "(c) 2019 Figglewatts"
 	app.Flags = []cli.Flag{

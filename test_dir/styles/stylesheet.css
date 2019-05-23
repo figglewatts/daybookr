@@ -90,6 +90,14 @@ body article li p {
 body article li a {
     word-break: break-all;
 }
+body article li.post {
+    margin-block-end: 1em;
+}
+body article li.post p {
+    display: block;
+    margin-block-end: 0;
+    margin-left: 3em;
+}
 
 body article blockquote {
     border-left: 1px #adadad;
