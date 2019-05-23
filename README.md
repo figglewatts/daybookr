@@ -56,3 +56,4 @@ COPYRIGHT:
 - Generate front page (with all posts)
 - Years are not sorted on the archive page
 - Tags are not sorted on the tags page
+- Potential for removal of site base url?

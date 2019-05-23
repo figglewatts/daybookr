@@ -8,10 +8,10 @@
 
     <article>
         
-        {{range $tag, $postList := .Site.Tags}}
-            <h1 id={{$tag}}>{{$tag}}</h1>
+        {{range .Site.Tags}}
+            <h1 id={{.Name}}>{{.Name}}</h1>
             <ul>
-            {{range $postList}}
+            {{range .Posts}}
                 <li><a href="{{.Name}}.html">{{.Title}}</a></li>
             {{end}}
             </ul>

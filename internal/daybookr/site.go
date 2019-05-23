@@ -17,11 +17,16 @@ type Site struct {
 	Author         string
 	Pages          []Page
 	Posts          []Post
-	Tags           map[string][]Post
+	Tags           []tag
 	FooterLinks    []Link
 	Conf           simpleyaml.Yaml
 	BaseURL        *url.URL
 	GenerationTime time.Time
+}
+
+type tag struct {
+	Name  string
+	Posts []Post
 }
 
 func (site Site) MakeSiteURL(relativeURL string) (*url.URL, error) {
@@ -51,8 +56,6 @@ func createSite(baseURL string, config *simpleyaml.Yaml, inputDir string) (Site,
 	}
 	site.Pages = pages
 
-	site.Tags = make(map[string][]Post)
-
 	posts, err := loadAllPosts(path.Join(inputDir, postsDir), &site)
 	if err != nil {
 		return Site{}, fmt.Errorf("could not load posts: %v", err)
@@ -64,9 +67,41 @@ func createSite(baseURL string, config *simpleyaml.Yaml, inputDir string) (Site,
 	})
 	site.Posts = posts
 
+	// link tags to posts
+	site.Tags = compileTags(site)
+
 	site.GenerationTime = time.Now()
 
 	return site, nil
+}
+
+func compileTags(site Site) []tag {
+	// first link all unique tag names to their tagged posts
+	tagsUnsorted := make(map[string][]Post)
+	for _, post := range site.Posts {
+		for _, tag := range post.Tags {
+			tagsUnsorted[tag] = append(tagsUnsorted[tag], post)
+		}
+	}
+
+	// now sort tag names alphabetically
+	var tagNames []string
+	for tagName := range tagsUnsorted {
+		tagNames = append(tagNames, tagName)
+	}
+	sort.Slice(tagNames, func(i, j int) bool {
+		return strings.ToLower(tagNames[i]) < strings.ToLower(tagNames[j])
+	})
+
+	// finally, make an alphabetical array of tags with their posts
+	var tags []tag
+	for _, tagName := range tagNames {
+		tags = append(tags, tag{
+			tagName,
+			tagsUnsorted[tagName],
+		})
+	}
+	return tags
 }
 
 func (site *Site) populateWithConfig(config *simpleyaml.Yaml) error {

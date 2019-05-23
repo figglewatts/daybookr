@@ -75,11 +75,6 @@ func loadPost(postPath string, site *Site) (Post, error) {
 	// override the name with the date as a string
 	post.Name = post.Date.Format(iso8601Date)
 
-	// register the tags with the site
-	for _, tag := range post.Tags {
-		site.Tags[tag] = append(site.Tags[tag], post)
-	}
-
 	return post, nil
 }
 

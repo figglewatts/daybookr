@@ -8,10 +8,10 @@
 
     <article>
         
-        {{range $year, $postList := PostsByYear .Site}}
-            <h1 id={{$year}}>{{$year}}</h1>
+        {{range PostsByYear .Site}}
+            <h1 id={{.Year}}>{{.Year}}</h1>
             <ul>
-            {{range $postList}}
+            {{range .Posts}}
                 <li><a href={{.Name}}>{{.Title}}</a></li>
             {{end}}
             </ul>
