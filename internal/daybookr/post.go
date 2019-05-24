@@ -58,6 +58,7 @@ func loadAllPosts(postsDir string, site *Site) ([]Post, error) {
 }
 
 func loadPost(postPath string, site *Site) (Post, error) {
+	fmt.Println(postPath)
 	post := Post{}
 	page, err := loadPage(postPath, site)
 	post.Page = page
