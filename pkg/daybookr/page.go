@@ -101,6 +101,7 @@ func loadPage(pagePath string, site *Site) (Page, error) {
 
 	// convert the page body into HTML
 	pageBody := htmlFromMarkdown(body)
+	fmt.Printf("Body: %v\nmarkdown: %v\n", body, pageBody)
 
 	// the page name is the filename without the extension
 	pageName := path.Base(pagePath)
@@ -125,7 +126,7 @@ func getPageHeaderAndBody(page string) (string, string, error) {
 	// we want to split by the separator character, ignore empty elements,
 	// and trim the whitespace either side
 	var splitNotEmpty []string
-	for _, s := range strings.Split(page, "---") {
+	for _, s := range strings.SplitN(page, "---", 3) {
 		if s != "" {
 			splitNotEmpty = append(splitNotEmpty, strings.TrimSpace(s))
 		}

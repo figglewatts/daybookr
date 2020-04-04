@@ -31,8 +31,14 @@ func Generate(inputFolder string, outputFolder string, configPath string) error 
 	}
 
 	// remove the output folder and remake it to clear contents
-	os.RemoveAll(outputFolder)
-	os.MkdirAll(outputFolder, os.ModePerm)
+	err = os.RemoveAll(outputFolder)
+	if err != nil {
+		return fmt.Errorf("unable to remove output folder '%s': %v", outputFolder, err)
+	}
+	err = os.MkdirAll(outputFolder, os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("unable to make new output directory '%s': %v", outputFolder, err)
+	}
 
 	// load the config
 	config, err := loadConfig(configPath)

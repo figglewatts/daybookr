@@ -6,15 +6,19 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"bytes"
 
-	"gopkg.in/russross/blackfriday.v2"
+	"github.com/yuin/goldmark"
 )
 
 // convert markdown into HTML
 func htmlFromMarkdown(markdown string) string {
 	markdownBytes := []byte(markdown)
-	htmlBytes := blackfriday.Run(markdownBytes)
-	return string(htmlBytes)
+	var buf bytes.Buffer
+	if err := goldmark.Convert(markdownBytes, &buf); err != nil {
+		panic(err)
+	}
+	return buf.String()
 }
 
 func makeURL(urlString string) (*url.URL, error) {

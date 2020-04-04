@@ -6,7 +6,7 @@ import (
 	"path"
 	"time"
 
-	"github.com/figglewatts/daybookr/internal/daybookr"
+	"github.com/figglewatts/daybookr/pkg/daybookr"
 	"gopkg.in/urfave/cli.v1"
 )
 
@@ -56,9 +56,9 @@ func main() {
 	app.UsageText = "daybookr [global options]"
 	app.Action = runDaybookr
 	app.Author = "Figglewatts"
-	app.Version = "1.0"
+	app.Version = "1.1"
 	app.Compiled = time.Now()
-	app.Copyright = "(c) 2019 Figglewatts"
+	app.Copyright = "(c) 2020 Figglewatts"
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:  fmt.Sprintf("%s, %s", inputFolderFlagName, inputFolderShortName),
