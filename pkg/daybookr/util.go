@@ -1,6 +1,8 @@
 package daybookr
 
-import "sort"
+import (
+	"sort"
+)
 
 func To(end int, s []string) []string {
 	return s[:end]

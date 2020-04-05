@@ -18,11 +18,11 @@ const (
 
 func CreateLink(text string, target string) (Link, error) {
 	link := Link{Text: text}
-	url, err := url.Parse(target)
+	parsedTarget, err := url.Parse(target)
 	if err != nil {
 		return Link{}, err
 	}
-	link.Target = url
+	link.Target = parsedTarget
 	return link, nil
 }
 

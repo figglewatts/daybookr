@@ -1,12 +1,12 @@
 package daybookr
 
 import (
+	"bytes"
 	"io/ioutil"
 	"net/url"
 	"os"
 	"path"
 	"path/filepath"
-	"bytes"
 
 	"github.com/yuin/goldmark"
 )

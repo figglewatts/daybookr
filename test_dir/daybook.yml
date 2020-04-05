@@ -1,11 +1,11 @@
 title: My Journal
 subtitle: This is my journal
-author: Figglewatts
+author: Joseph Bloggs
 footer-links:
   - text: "Twitter"
     target: "https://www.twitter.com"
   - text: "Google"
     target: "https://www.google.com"
 data-folders: [ styles ]
-data-files: [ robots.txt ]
+data-files: []
 number-of-recent-posts: 15

@@ -20,14 +20,14 @@ func loadAllTemplates(templatesDir string, includes []string) (map[string]*templ
 	if err != nil {
 		return nil, err
 	}
-	for _, template := range templates {
-		loadedTemplate, err := loadTemplate(template, includes)
+	for _, siteTemplate := range templates {
+		loadedTemplate, err := loadTemplate(siteTemplate, includes)
 		if err != nil {
 			fmt.Println("err")
-			return nil, fmt.Errorf("could not load template '%s': %v", template, err)
+			return nil, fmt.Errorf("could not load siteTemplate '%s': %v", siteTemplate, err)
 		}
-		// template name is template filename without extension
-		templateName := path.Base(template)
+		// siteTemplate name is siteTemplate filename without extension
+		templateName := path.Base(siteTemplate)
 		templateName = strings.TrimSuffix(templateName, filepath.Ext(templateName))
 		loadedTemplates[templateName] = loadedTemplate
 	}

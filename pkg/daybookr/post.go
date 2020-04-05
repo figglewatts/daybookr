@@ -62,9 +62,9 @@ func loadPost(postPath string, site *Site) (Post, error) {
 	page, err := loadPage(postPath, site)
 	post.Page = page
 
-	tags, time, err := getPostMetadata(post)
+	tags, postDate, err := getPostMetadata(post)
 	post.Tags = tags
-	post.Date = time
+	post.Date = postDate
 	if err != nil {
 		return Post{}, err
 	}
