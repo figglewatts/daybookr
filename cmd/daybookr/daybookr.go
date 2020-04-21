@@ -59,7 +59,7 @@ func newProject(c *cli.Context) error {
 		}
 	}
 
-	err = os.MkdirAll(outputFolder, 0644)
+	err = os.MkdirAll(outputFolder, 0744)
 	if err != nil {
 		return err
 	}

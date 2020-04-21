@@ -101,7 +101,6 @@ func loadPage(pagePath string, site *Site) (Page, error) {
 
 	// convert the page body into HTML
 	pageBody := htmlFromMarkdown(body)
-	fmt.Printf("Body: %v\nmarkdown: %v\n", body, pageBody)
 
 	// the page name is the filename without the extension
 	pageName := path.Base(pagePath)
