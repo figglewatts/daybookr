@@ -85,7 +85,7 @@ func newProject(c *cli.Context) error {
 				return err
 			}
 			targetDirectory := filepath.Dir(filepath.Join(outputFolder, path))
-			err = os.MkdirAll(targetDirectory, 0644)
+			err = os.MkdirAll(targetDirectory, 0744)
 			if err != nil {
 				return err
 			}
@@ -108,7 +108,7 @@ func main() {
 		Name: "daybookr",
 		Usage: "generate a static site based on some content, config and templates",
 		UsageText: "daybookr [global options] COMMAND [options]",
-		Version: "2.0.0",
+		Version: "2.0.1",
 		Compiled: time.Now(),
 		Authors: []*cli.Author{
 			{
