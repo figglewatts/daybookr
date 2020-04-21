@@ -2,6 +2,9 @@ package daybookr
 
 import (
 	"bytes"
+	"github.com/yuin/goldmark/extension"
+	"github.com/yuin/goldmark/parser"
+	"github.com/yuin/goldmark/renderer/html"
 	"io/ioutil"
 	"net/url"
 	"os"
@@ -11,11 +14,25 @@ import (
 	"github.com/yuin/goldmark"
 )
 
+// the goldmark markdown renderer with additional options and extensions
+var mdRenderer = goldmark.New(
+		goldmark.WithParserOptions(
+			parser.WithAutoHeadingID(),
+		),
+		goldmark.WithRendererOptions(
+			html.WithUnsafe(),
+		),
+		goldmark.WithExtensions(
+			extension.GFM,
+			extension.Footnote,
+		),
+	)
+
 // convert markdown into HTML
 func htmlFromMarkdown(markdown string) string {
 	markdownBytes := []byte(markdown)
 	var buf bytes.Buffer
-	if err := goldmark.Convert(markdownBytes, &buf); err != nil {
+	if err := mdRenderer.Convert(markdownBytes, &buf); err != nil {
 		panic(err)
 	}
 	return buf.String()
