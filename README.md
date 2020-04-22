@@ -3,7 +3,7 @@ Simple static site generator. Quick and dirty, extremely barebones. Great for sc
 
 ## Installation
 ```bash
-$ go install github.com/figglewatts/daybookr/cmd/daybookr
+$ go get -u github.com/figglewatts/daybookr/cmd/daybookr
 ```
 
 ## Usage
