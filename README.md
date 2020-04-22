@@ -15,7 +15,7 @@ USAGE:
    daybookr [global options] COMMAND [options]
 
 VERSION:
-   2.0.0
+   2.0.2
 
 AUTHOR:
    Figglewatts
@@ -23,6 +23,7 @@ AUTHOR:
 COMMANDS:
    generate  generate the site
    new       create a new site
+   open      open a daybookr site in a browser
    help, h   Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
