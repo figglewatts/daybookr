@@ -48,10 +48,26 @@ func loadTemplate(templatePath string, includes []string) (*template.Template, e
 		return nil, err
 	}
 
-	// now load the includes into this template
-	templateLoaded, err = templateLoaded.ParseFiles(includes...)
+	templateLoaded, err = loadTemplateString(templateName, templateContent, includes)
 	if err != nil {
-		return nil, fmt.Errorf("unable to load template includes: %v", err)
+		return nil, err
+	}
+
+	return templateLoaded, nil
+}
+
+func loadTemplateString(templateName string, templateStr string, includes []string) (*template.Template, error) {
+	templateLoaded, err := template.New(templateName).Funcs(createFuncMap()).Parse(templateStr)
+	if err != nil {
+		return nil, err
+	}
+
+	// now load the includes into this template if they're given
+	if includes != nil {
+		templateLoaded, err = templateLoaded.ParseFiles(includes...)
+		if err != nil {
+			return nil, fmt.Errorf("unable to load template includes: %v", err)
+		}
 	}
 
 	return templateLoaded, nil

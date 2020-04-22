@@ -12,6 +12,7 @@ import (
 	"github.com/figglewatts/daybookr/pkg/daybookr"
 	"github.com/rakyll/statik/fs"
 	"github.com/urfave/cli/v2"
+	"github.com/pkg/browser"
 )
 
 //go:generate statik -f -src=../../test_dir
@@ -59,7 +60,7 @@ func newProject(c *cli.Context) error {
 		}
 	}
 
-	err = os.MkdirAll(outputFolder, 0744)
+	err = os.MkdirAll(outputFolder, 0644)
 	if err != nil {
 		return err
 	}
@@ -85,7 +86,7 @@ func newProject(c *cli.Context) error {
 				return err
 			}
 			targetDirectory := filepath.Dir(filepath.Join(outputFolder, path))
-			err = os.MkdirAll(targetDirectory, 0744)
+			err = os.MkdirAll(targetDirectory, 0644)
 			if err != nil {
 				return err
 			}
@@ -103,12 +104,32 @@ func newProject(c *cli.Context) error {
 	return nil
 }
 
+func openProject(c *cli.Context) error {
+	inputFolder := c.Args().Get(0)
+	if len(inputFolder) == 0 {
+		inputFolder = "."
+	}
+
+	outputFolder := c.Args().Get(1)
+	if len(outputFolder) == 0 {
+		outputFolder = "static"
+	}
+	indexPage := path.Join(inputFolder, outputFolder, "index.html")
+
+	err := browser.OpenFile(indexPage)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func main() {
 	app := &cli.App{
 		Name: "daybookr",
 		Usage: "generate a static site based on some content, config and templates",
 		UsageText: "daybookr [global options] COMMAND [options]",
-		Version: "2.0.1",
+		Version: "2.0.2",
 		Compiled: time.Now(),
 		Authors: []*cli.Author{
 			{
@@ -132,6 +153,14 @@ func main() {
 				UsageText: "daybookr new DIR",
 				Description: "DIR: the directory to generate the new site in.",
 				Action: newProject,
+			},
+			{
+				Name: "open",
+				Usage: "open a daybookr site in a browser",
+				UsageText: "daybookr open [PROJECT_DIR] [OUTPUT_DIR]",
+				Description: `PROJECT_DIR: the directory containing data files of the site to generate. Default: '.'.
+   OUTPUT_DIR:  the directory (relative to PROJECT_DIR) containing the generated site. Default: 'static'.`,
+				Action: openProject,
 			},
 		},
 	}

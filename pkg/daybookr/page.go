@@ -99,14 +99,26 @@ func loadPage(pagePath string, site *Site) (Page, error) {
 		return Page{}, err
 	}
 
-	// convert the page body into HTML
-	pageBody := htmlFromMarkdown(body)
-
 	// the page name is the filename without the extension
 	pageName := path.Base(pagePath)
 	pageName = strings.TrimSuffix(pageName, filepath.Ext(pageName))
 
 	pageTitle := strings.Title(pageName)
+
+	// create a template from the page
+	pageTemplate, err := loadTemplateString(pageName, body, nil)
+	if err != nil {
+		return Page{}, err
+	}
+
+	// template the page body
+	renderedPageBody, err := renderTemplate(pageTemplate, site)
+	if err != nil {
+		return Page{}, err
+	}
+
+	// convert the templated body into HTML
+	pageBody := htmlFromMarkdown(renderedPageBody)
 
 	return Page{
 		Layout:     pageLayout,
