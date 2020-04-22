@@ -7,5 +7,9 @@
     <script>hljs.initHighlightingOnLoad();</script>
     <meta name="robots" content="noindex,nofollow">
 
-    <title>{{.Title}}</title>
+    {{ if IsSite . }}
+    <title>{{ .Title }}</title>
+    {{ else }}
+    <title>{{ .Title }} - {{ .Site.Title }}</title>
+    {{ end }}
 </head>

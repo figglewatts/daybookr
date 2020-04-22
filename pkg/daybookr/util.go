@@ -16,6 +16,11 @@ func FromTo(start int, end int, s []string) []string {
 	return s[start:end]
 }
 
+func IsSite(data interface{}) bool {
+	_, isSite := data.(Site)
+	return isSite
+}
+
 type yearPosts struct {
 	Year  int
 	Posts []Post

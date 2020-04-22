@@ -41,6 +41,8 @@ func createSite(config *simpleyaml.Yaml, inputDir string) (Site, error) {
 		return Site{}, fmt.Errorf("unable to create site from config: %v", err)
 	}
 
+	site.GenerationTime = time.Now()
+
 	pages, err := loadAllPages(path.Join(inputDir, pagesDir), &site)
 	if err != nil {
 		return Site{}, fmt.Errorf("could not load pages: %v", err)
@@ -60,8 +62,6 @@ func createSite(config *simpleyaml.Yaml, inputDir string) (Site, error) {
 
 	// link tags to posts
 	site.Tags = compileTags(site)
-
-	site.GenerationTime = time.Now()
 
 	return site, nil
 }

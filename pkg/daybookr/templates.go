@@ -80,5 +80,6 @@ func createFuncMap() template.FuncMap {
 		"To":          To,
 		"FromTo":      FromTo,
 		"PostsByYear": PostsByYear,
+		"IsSite": 	   IsSite,
 	}
 }

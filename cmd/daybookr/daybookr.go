@@ -129,7 +129,7 @@ func main() {
 		Name: "daybookr",
 		Usage: "generate a static site based on some content, config and templates",
 		UsageText: "daybookr [global options] COMMAND [options]",
-		Version: "2.0.2",
+		Version: "2.0.3",
 		Compiled: time.Now(),
 		Authors: []*cli.Author{
 			{
