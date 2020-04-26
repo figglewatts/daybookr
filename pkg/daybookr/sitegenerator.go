@@ -35,7 +35,7 @@ func Generate(inputFolder string, outputFolder string, configPath string) error 
 	if err != nil {
 		return fmt.Errorf("unable to remove output folder '%s': %v", outputFolder, err)
 	}
-	err = os.MkdirAll(outputFolder, 0644)
+	err = os.MkdirAll(outputFolder, 0755)
 	if err != nil {
 		return fmt.Errorf("unable to make new output directory '%s': %v", outputFolder, err)
 	}
@@ -193,5 +193,5 @@ func copyToOutput(paths []string, inputFolder string, outputFolder string) error
 }
 
 func writeHTML(html string, filename string) error {
-	return ioutil.WriteFile(filename+".html", []byte(html), 0644)
+	return ioutil.WriteFile(filename+".html", []byte(html), 0755)
 }

@@ -15,7 +15,7 @@ USAGE:
    daybookr [global options] COMMAND [options]
 
 VERSION:
-   2.0.3
+   2.0.4
 
 AUTHOR:
    Figglewatts

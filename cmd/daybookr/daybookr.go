@@ -60,7 +60,7 @@ func newProject(c *cli.Context) error {
 		}
 	}
 
-	err = os.MkdirAll(outputFolder, 0644)
+	err = os.MkdirAll(outputFolder, 0755)
 	if err != nil {
 		return err
 	}
@@ -86,11 +86,11 @@ func newProject(c *cli.Context) error {
 				return err
 			}
 			targetDirectory := filepath.Dir(filepath.Join(outputFolder, path))
-			err = os.MkdirAll(targetDirectory, 0644)
+			err = os.MkdirAll(targetDirectory, 0755)
 			if err != nil {
 				return err
 			}
-			err = ioutil.WriteFile(filepath.Join(outputFolder, path), fileData, 0644)
+			err = ioutil.WriteFile(filepath.Join(outputFolder, path), fileData, 0755)
 			if err != nil {
 				return err
 			}
@@ -129,7 +129,7 @@ func main() {
 		Name: "daybookr",
 		Usage: "generate a static site based on some content, config and templates",
 		UsageText: "daybookr [global options] COMMAND [options]",
-		Version: "2.0.3",
+		Version: "2.0.4",
 		Compiled: time.Now(),
 		Authors: []*cli.Author{
 			{
